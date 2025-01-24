@@ -4,13 +4,67 @@ services:
 
   frontend:
     image: store:latest
+    build:
+      context: .
+      dockerfile: ./eShopLite/Store/Dockerfile
     environment: 
       - ProductEndpoint=http://backend:8080
+      - ZIPKIN_URL=http://zipkin:9411
+      - OTLP_ENDPOINT=http://aspire:18889
     ports:
       - "32000:8080"
     depends_on: 
       - backend
+      - prometheus
+      - zipkin
   backend:
     image: products:latest
+    build:
+      context: .
+      dockerfile: ./eShopLite/Products/Dockerfile
+    environment:
+      - ZIPKIN_URL=http://zipkin:9411
+      - OTLP_ENDPOINT=http://aspire:18889
     ports: 
       - "32001:8080"
+    depends_on:
+      - prometheus
+      - zipkin
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    volumes:
+      - ./grafana/datasource:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+
+  aspire:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard
+    ports:
+      - "18888:18888"
+      - "18889:18889"
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true

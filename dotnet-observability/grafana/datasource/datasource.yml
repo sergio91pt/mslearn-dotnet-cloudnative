@@ -1,0 +1,14 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+    access: proxy
+    editable: true
+  - name: Zipkin
+    type: zipkin
+    url: http://zipkin:9411
+    access: proxy
+    editable: true
