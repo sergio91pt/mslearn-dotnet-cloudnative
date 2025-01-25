@@ -5,6 +5,7 @@ namespace DataEntities;
 
 public class Order
 {
+    [EUPData]
     [Key]
     [JsonPropertyName("id")]
     public int Id { get; set; }
@@ -15,9 +16,11 @@ public class Order
     [JsonPropertyName("total")] 
     public decimal Total { get; set; }
 
+    [EUIIData]
     [JsonPropertyName("customerName")]
     public string? CustomerName { get; set; }
 
+    [EUIIData]
     [JsonPropertyName("customerAddress")]
     public string? CustomerAddress { get; set; }
 }
